@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>dedsamodell.gg — Чёрно‑белый портал</title>
+  <link rel="icon" href="https://cdn.corenexis.com/files/c/1536754720.jpg">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      width: 100%;
+      height: 100vh;
+      overflow: hidden;
+      font-family: 'Cinzel', serif;
+      background: #000; /* fallback */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      cursor: none;
+      /* фоновое изображение */
+      background-image: url('https://cdn.corenexis.com/files/c/8538587720.png');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+
+    /* Затемняющая вуаль для читаемости */
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .custom-cursor {
+      position: fixed;
+      width: 22px;
+      height: 22px;
+      background: radial-gradient(circle, #ffffff 0%, #aaaaaa 60%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 1000;
+      box-shadow: 0 0 20px #ffffff;
+      mix-blend-mode: screen;
+      transform: translate(-50%, -50%);
+      transition: width 0.1s, height 0.1s;
+    }
+
+    #mainCanvas {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 2;
+      pointer-events: none;
+      background: transparent;
+    }
+
+    .content {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      text-align: center;
+      pointer-events: auto;
+      cursor: pointer;
+      transition: opacity 0.3s ease;
+    }
+
+    .pointer-arrow {
+      width: 0;
+      height: 0;
+      border-left: 14px solid transparent;
+      border-right: 14px solid transparent;
+      border-top: 18px solid #ffffff;
+      margin-bottom: -10px;
+      filter: drop-shadow(0 0 10px #ffffff);
+      animation: arrowBounce 1.2s ease-in-out infinite, arrowGlow 1.5s ease-in-out infinite alternate;
+      pointer-events: none;
+      order: -1;
+    }
+
+    @keyframes arrowBounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    @keyframes arrowGlow {
+      0% { filter: drop-shadow(0 0 8px #cccccc); }
+      100% { filter: drop-shadow(0 0 20px #ffffff); }
+    }
+
+    .logo-img {
+      width: 100px; height: 100px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #ffffff;
+      box-shadow: 0 0 35px rgba(255,255,255,0.7);
+      animation: floatLogo 3s ease-in-out infinite;
+      transition: 0.2s;
+      cursor: pointer;
+    }
+
+    @keyframes floatLogo {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    .logo-img:hover {
+      box-shadow: 0 0 60px #ffffff;
+    }
+
+    .gothic-title {
+      font-family: 'Cinzel', serif;
+      font-weight: 900;
+      font-size: clamp(3rem, 7vw, 5rem);
+      letter-spacing: 0.08em;
+      background: linear-gradient(180deg, #ffffff 0%, #aaaaaa 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter: drop-shadow(0 0 18px #cccccc);
+      animation: titleGlow 2s infinite alternate;
+      margin: 0;
+      text-transform: uppercase;
+      cursor: default;
+    }
+
+    @keyframes titleGlow {
+      0% { filter: drop-shadow(0 0 18px #cccccc); }
+      100% { filter: drop-shadow(0 0 35px #ffffff); }
+    }
+
+    .subtitle {
+      font-family: 'Cinzel', serif;
+      font-weight: 700;
+      font-size: 1.3rem;
+      color: #dddddd;
+      text-shadow: 0 0 15px rgba(255,255,255,0.6);
+      letter-spacing: 0.08em;
+      animation: subtitlePulse 2s infinite alternate;
+    }
+
+    @keyframes subtitlePulse {
+      0% { text-shadow: 0 0 12px #aaaaaa; }
+      100% { text-shadow: 0 0 25px #ffffff; }
+    }
+
+    .btn-fight {
+      position: relative;
+      display: inline-block;
+      padding: 18px 55px;
+      font-size: 2rem;
+      font-family: 'Cinzel', serif;
+      font-weight: 700;
+      background: linear-gradient(135deg, #aaaaaa, #666666);
+      color: #fff;
+      text-decoration: none;
+      border-radius: 80px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      box-shadow: 0 0 35px rgba(255,255,255,0.5), inset 0 0 10px rgba(255,255,255,0.2);
+      border: 2px solid #ffffff;
+      transition: 0.2s;
+      cursor: pointer;
+      overflow: hidden;
+      z-index: 1;
+    }
+
+    .btn-fight:hover {
+      transform: scale(1.04);
+      box-shadow: 0 0 60px #ffffff, 0 0 100px #888888;
+      border-color: #ffffff;
+    }
+
+    .btn-fight::before {
+      content: '';
+      position: absolute;
+      top: -50%; left: -50%;
+      width: 200%; height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.7) 0%, transparent 70%);
+      opacity: 0;
+      transition: opacity 0.15s;
+      pointer-events: none;
+    }
+
+    .btn-fight:hover::before {
+      opacity: 1;
+      animation: buttonExplode 0.5s ease-out forwards;
+    }
+
+    @keyframes buttonExplode {
+      0% { transform: scale(0.5); opacity: 1; }
+      100% { transform: scale(1.6); opacity: 0; }
+    }
+
+    .footer-note {
+      position: absolute;
+      bottom: 12px; left: 15px;
+      z-index: 10;
+      font-family: sans-serif;
+      font-size: 0.75rem;
+      color: #ccc;
+      pointer-events: auto;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(6px);
+      padding: 6px 14px;
+      border-radius: 25px;
+      border: 1px solid rgba(255,255,255,0.4);
+    }
+    .footer-note span {
+      text-shadow: 0 0 6px black;
+    }
+    .footer-note strong em {
+      font-style: italic;
+      font-weight: bold;
+      color: #ffffff;
+    }
+    .footer-note a {
+      color: #fff;
+      text-decoration: none;
+      padding: 4px 12px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 18px;
+      border: 1px solid #ffffff;
+      transition: 0.2s;
+    }
+    .footer-note a:hover {
+      background: rgba(255,255,255,0.3);
+      box-shadow: 0 0 15px #ffffff;
+    }
+
+    /* ----- ПЛЕЕР ----- */
+    .music-player {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      z-index: 200;
+      pointer-events: auto;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(10px);
+      border: 1px solid #ffffff;
+      border-radius: 12px;
+      padding: 10px 15px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: #fff;
+      font-family: 'Arial', sans-serif;
+      box-shadow: 0 0 15px rgba(255,255,255,0.3);
+      transition: 0.3s;
+    }
+
+    .player-controls {
+      display: flex;
+      gap: 5px;
+    }
+
+    .ctrl-btn {
+      background: rgba(255,255,255,0.15);
+      border: 1px solid #ffffff;
+      color: #ffffff;
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: 0.2s;
+      user-select: none;
+      font-weight: bold;
+    }
+
+    .ctrl-btn:hover {
+      background: rgba(255,255,255,0.4);
+      box-shadow: 0 0 12px #ffffff;
+    }
+
+    .play-btn {
+      font-size: 1.3rem;
+    }
+
+    .track-display {
+      font-size: 0.85rem;
+      max-width: 120px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: #cccccc;
+      margin-right: 5px;
+      cursor: default;
+    }
+
+    .playlist-dropdown {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      margin-top: 5px;
+      width: 100%;
+      background: rgba(0, 0, 0, 0.9);
+      border: 1px solid #ffffff;
+      border-radius: 8px;
+      overflow: hidden;
+      opacity: 0;
+      visibility: hidden;
+      transition: 0.25s ease;
+      box-shadow: 0 0 20px rgba(255,255,255,0.4);
+      backdrop-filter: blur(8px);
+      z-index: 210;
+    }
+
+    .music-player:hover .playlist-dropdown {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .playlist-list {
+      list-style: none;
+      padding: 5px 0;
+      margin: 0;
+    }
+
+    .playlist-list li {
+      padding: 8px 12px;
+      font-size: 0.8rem;
+      color: #cccccc;
+      cursor: pointer;
+      transition: 0.2s;
+      white-space: nowrap;
+    }
+
+    .playlist-list li:hover,
+    .playlist-list li.active {
+      background: rgba(255,255,255,0.3);
+      color: #ffffff;
+      text-shadow: 0 0 8px #ffffff;
+    }
+
+    .fullscreen-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.95);
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease;
+      cursor: default;
+      gap: 20px;
+    }
+
+    .fullscreen-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .overlay-close {
+      position: absolute;
+      top: 20px;
+      right: 30px;
+      font-size: 2.5rem;
+      color: #ffffff;
+      cursor: pointer;
+      text-shadow: 0 0 15px #ffffff;
+      transition: 0.2s;
+    }
+
+    .overlay-close:hover {
+      text-shadow: 0 0 30px #ffffff;
+    }
+
+    .overlay-text {
+      font-family: 'Cinzel', serif;
+      font-size: 2rem;
+      color: #ffffff;
+      text-shadow: 0 0 20px #cccccc;
+      text-align: center;
+      animation: overlayPulse 1s infinite alternate;
+    }
+
+    @keyframes overlayPulse {
+      0% { text-shadow: 0 0 15px #cccccc; }
+      100% { text-shadow: 0 0 40px #ffffff; }
+    }
+
+    .overlay-img {
+      max-width: 70%;
+      max-height: 40vh;
+      border: 2px solid #ffffff;
+      box-shadow: 0 0 30px #cccccc;
+      border-radius: 10px;
+      object-fit: contain;
+    }
+
+    /* Заменённая надпись */
+    .overlay-subtext {
+      font-family: 'Cinzel', serif;
+      font-size: 1.6rem;
+      color: #ffffff;
+      text-shadow: 0 0 12px #aaaaaa;
+      text-align: center;
+    }
+
+    .overlay-link {
+      font-family: 'Cinzel', serif;
+      font-size: 1.8rem;
+      color: #fff;
+      background: linear-gradient(135deg, #aaaaaa, #666666);
+      padding: 12px 40px;
+      border-radius: 50px;
+      text-decoration: none;
+      box-shadow: 0 0 30px rgba(255,255,255,0.5);
+      border: 1px solid #ffffff;
+      transition: 0.2s;
+    }
+
+    .overlay-link:hover {
+      box-shadow: 0 0 50px #ffffff;
+      background: linear-gradient(135deg, #cccccc, #888888);
+    }
+  </style>
+</head>
+<body>
+  <canvas id="mainCanvas"></canvas>
+  <div class="custom-cursor" id="cursor"></div>
+
+  <!-- Плеер -->
+  <div class="music-player" id="musicPlayer">
+    <div class="player-controls">
+      <button id="prevBtn" class="ctrl-btn" title="Предыдущий">⏮</button>
+      <button id="playPauseBtn" class="ctrl-btn play-btn" title="Воспроизведение / Пауза">⏵</button>
+      <button id="nextBtn" class="ctrl-btn" title="Следующий">⏭</button>
+    </div>
+    <div class="track-display" id="trackTitle">Sneaky - Silence</div>
+    <div class="playlist-dropdown">
+      <ul class="playlist-list" id="playlist">
+        <li data-index="0">encassator - lil sky</li>
+        <li data-index="1">VZNZZ REMIX</li>
+        <li data-index="2" class="active">Sneaky - Silence</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="content" id="mainContent">
+    <div class="pointer-arrow"></div>
+    <img src="https://cdn.corenexis.com/files/c/1536754720.jpg" alt="Dragon" class="logo-img" id="logoImage">
+    <!-- Заменённый заголовок -->
+    <h1 class="gothic-title">dedsamodell.gg</h1>
+    <!-- Заменённый подзаголовок на английский -->
+    <p class="subtitle">⚔️ Best script for Trident Survival ⚔️</p>
+    <a href="https://discord.gg/arvR9rQTx4" target="_blank" class="btn-fight" id="fightBtn">🔥 Присоединиться к нам</a>
+  </div>
+
+  <div class="footer-note">
+    <span>dedsamodell gg — лучший скрипт на <strong><em>trident survival</em></strong></span>
+    <a href="https://discord.gg/arvR9rQTx4" target="_blank">Заходи</a>
+  </div>
+
+  <div class="fullscreen-overlay" id="overlay">
+    <span class="overlay-close" id="overlayClose">&times;</span>
+    <div class="overlay-text">лучший скрипт на trident survival dedsamodell n1</div>
+    <img src="https://cdn.corenexis.com/files/c/9818385720.jpg" alt="Trident" class="overlay-img">
+    <!-- Изменённый текст -->
+    <div class="overlay-subtext">хороший скрипт на тридент</div>
+    <a href="https://discord.gg/arvR9rQTx4" target="_blank" class="overlay-link">Перейти в Discord</a>
+  </div>
+
+  <script>
+    (function() {
+      const canvas = document.getElementById('mainCanvas');
+      const ctx = canvas.getContext('2d');
+      let width, height;
+      let mouseX = -500, mouseY = -500;
+      const cursorDiv = document.getElementById('cursor');
+
+      // --- Плеер ---
+      const tracks = [
+        { src: "https://github.com/ionypu68-star/9922/raw/refs/heads/main/encassator_lil_sky.mp3", title: "encassator - lil sky" },
+        { src: "https://github.com/ionypu68-star/9922/raw/refs/heads/main/vznzzvault_-_Duwap_Kaine_-_Robbin_Banks_PROD_VZNZZ_VZNZZ_REMIX_(SkySound.cc).mp3", title: "VZNZZ REMIX" },
+        { src: "https://github.com/ionypu68-star/9922/raw/refs/heads/main/Sneaky%20-%20Silence%20(hitmos.fm).mp3", title: "Sneaky - Silence" }
+      ];
+      let currentTrackIndex = 2;
+      let audio = new Audio();
+      let isPlaying = false;
+      let musicStarted = false;
+
+      const playPauseBtn = document.getElementById('playPauseBtn');
+      const prevBtn = document.getElementById('prevBtn');
+      const nextBtn = document.getElementById('nextBtn');
+      const trackTitle = document.getElementById('trackTitle');
+      const playlistItems = document.querySelectorAll('.playlist-list li');
+
+      function loadTrack(index) {
+        audio.src = tracks[index].src;
+        audio.load();
+        trackTitle.textContent = tracks[index].title;
+        document.title = tracks[index].title + " — dedsamodell.gg";
+        playlistItems.forEach((item, i) => {
+          item.classList.toggle('active', i === index);
+        });
+      }
+
+      function playTrack() {
+        audio.play().then(() => {
+          isPlaying = true;
+          playPauseBtn.innerHTML = '⏸';
+        }).catch(() => {});
+      }
+
+      function pauseTrack() {
+        audio.pause();
+        isPlaying = false;
+        playPauseBtn.innerHTML = '⏵';
+      }
+
+      function nextTrack() {
+        currentTrackIndex = (currentTrackIndex + 1) % tracks.length;
+        loadTrack(currentTrackIndex);
+        if (musicStarted) playTrack();
+      }
+
+      function prevTrack() {
+        currentTrackIndex = (currentTrackIndex - 1 + tracks.length) % tracks.length;
+        loadTrack(currentTrackIndex);
+        if (musicStarted) playTrack();
+      }
+
+      function startMusic() {
+        if (musicStarted) return;
+        loadTrack(currentTrackIndex);
+        playTrack();
+        musicStarted = true;
+      }
+
+      playPauseBtn.addEventListener('click', () => {
+        if (!musicStarted) startMusic();
+        else isPlaying ? pauseTrack() : playTrack();
+      });
+
+      prevBtn.addEventListener('click', () => {
+        if (!musicStarted) startMusic();
+        else prevTrack();
+      });
+
+      nextBtn.addEventListener('click', () => {
+        if (!musicStarted) startMusic();
+        else nextTrack();
+      });
+
+      playlistItems.forEach(item => {
+        item.addEventListener('click', (e) => {
+          const index = parseInt(e.target.getAttribute('data-index'));
+          if (index === currentTrackIndex && musicStarted) return;
+          currentTrackIndex = index;
+          loadTrack(currentTrackIndex);
+          if (!musicStarted) startMusic();
+          else playTrack();
+        });
+      });
+
+      loadTrack(currentTrackIndex);
+
+      document.addEventListener('click', () => {
+        if (!musicStarted) startMusic();
+      }, { once: false });
+
+      // --- Курсор и частицы (ч/б) ---
+      document.addEventListener('mousemove', (e) => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+        cursorDiv.style.left = mouseX + 'px';
+        cursorDiv.style.top = mouseY + 'px';
+      });
+      document.addEventListener('mousedown', () => cursorDiv.style.width = '30px');
+      document.addEventListener('mouseup', () => cursorDiv.style.width = '22px');
+
+      function grayColor(alpha = 1) {
+        const l = 40 + Math.random() * 60;
+        return `hsla(0, 0%, ${l}%, ${alpha})`;
+      }
+
+      function resizeCanvas() {
+        width = window.innerWidth;
+        height = window.innerHeight;
+        canvas.width = width;
+        canvas.height = height;
+      }
+      window.addEventListener('resize', resizeCanvas);
+      resizeCanvas();
+
+      class Ember {
+        constructor() { this.reset(); }
+        reset() {
+          this.x = Math.random() * width;
+          this.y = height + Math.random() * 40;
+          this.size = Math.random() * 4 + 2;
+          this.speedY = -Math.random() * 1.3 - 0.5;
+          this.speedX = (Math.random() - 0.5) * 0.4;
+          this.alpha = Math.random() * 0.6 + 0.3;
+          this.color = grayColor(this.alpha);
+          this.life = 1.0;
+          this.decay = 0.003 + Math.random() * 0.006;
+        }
+        update() {
+          this.x += this.speedX;
+          this.y += this.speedY;
+          this.life -= this.decay;
+          if (this.y < -20 || this.life <= 0) this.reset();
+        }
+        draw(ctx) {
+          ctx.save();
+          ctx.globalAlpha = this.alpha * this.life;
+          ctx.fillStyle = this.color;
+          ctx.shadowColor = this.color;
+          ctx.shadowBlur = 10;
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+      }
+
+      class Spark {
+        constructor(x, y) {
+          this.x = x; this.y = y;
+          const angle = Math.random() * Math.PI * 2;
+          const speed = Math.random() * 4 + 1.5;
+          this.vx = Math.cos(angle) * speed;
+          this.vy = Math.sin(angle) * speed;
+          this.size = Math.random() * 3 + 1;
+          this.life = 1.0;
+          this.decay = 0.015 + Math.random() * 0.02;
+          this.color = grayColor();
+        }
+        update() {
+          this.x += this.vx;
+          this.y += this.vy;
+          this.vy += 0.06;
+          this.life -= this.decay;
+        }
+        draw(ctx) {
+          if (this.life <= 0) return;
+          ctx.save();
+          ctx.globalAlpha = this.life * 0.9;
+          ctx.fillStyle = this.color;
+          ctx.shadowColor = this.color;
+          ctx.shadowBlur = 8;
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+        isDead() { return this.life <= 0; }
+      }
+
+      class Ash {
+        constructor() { this.reset(); }
+        reset() {
+          this.x = Math.random() * width;
+          this.y = -10 - Math.random() * 80;
+          this.size = Math.random() * 1.8 + 0.4;
+          this.speedY = Math.random() * 0.35 + 0.15;
+          this.wind = (Math.random() - 0.5) * 0.2;
+          this.alpha = Math.random() * 0.4 + 0.1;
+        }
+        update() {
+          this.y += this.speedY;
+          this.x += this.wind;
+          if (this.y > height + 20) this.reset();
+        }
+        draw(ctx) {
+          ctx.save();
+          ctx.globalAlpha = this.alpha;
+          ctx.fillStyle = '#888';
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+      }
+
+      class ShootingStar {
+        constructor() { this.reset(); }
+        reset() {
+          this.x = Math.random() * width;
+          this.y = -20 - Math.random() * 100;
+          this.len = Math.random() * 40 + 25;
+          this.sx = (Math.random() - 0.3) * 2.2;
+          this.sy = Math.random() * 3.2 + 2.5;
+          this.alpha = Math.random() * 0.7 + 0.3;
+          this.life = 1.0;
+          this.decay = 0.008 + Math.random() * 0.012;
+          this.color = grayColor();
+        }
+        update() {
+          this.x += this.sx;
+          this.y += this.sy;
+          this.life -= this.decay;
+          if (this.y > height + 50 || this.life <= 0) this.reset();
+        }
+        draw(ctx) {
+          if (this.life <= 0) return;
+          ctx.save();
+          ctx.globalAlpha = this.alpha * this.life;
+          ctx.strokeStyle = this.color;
+          ctx.shadowColor = this.color;
+          ctx.shadowBlur = 8;
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.moveTo(this.x, this.y);
+          ctx.lineTo(this.x - this.sx * 6, this.y - this.sy * 6);
+          ctx.stroke();
+          ctx.restore();
+        }
+      }
+
+      class Rune {
+        constructor() { this.reset(); }
+        reset() {
+          this.x = Math.random() * width;
+          this.y = -30 - Math.random() * 150;
+          this.size = Math.random() * 14 + 6;
+          this.speedY = Math.random() * 0.45 + 0.2;
+          this.wind = (Math.random() - 0.5) * 0.25;
+          this.alpha = Math.random() * 0.5 + 0.4;
+          this.rotation = Math.random() * Math.PI * 2;
+          this.rotSpeed = (Math.random() - 0.5) * 0.02;
+          this.symbol = String.fromCharCode(0x16A0 + Math.floor(Math.random() * 26));
+        }
+        update() {
+          this.y += this.speedY;
+          this.x += this.wind + Math.sin(Date.now() * 0.002 + this.x) * 0.15;
+          this.rotation += this.rotSpeed;
+          if (this.y > height + 40) this.reset();
+        }
+        draw(ctx) {
+          ctx.save();
+          ctx.translate(this.x, this.y);
+          ctx.rotate(this.rotation);
+          ctx.globalAlpha = this.alpha;
+          ctx.font = `${this.size}px "Cinzel", serif`;
+          ctx.fillStyle = grayColor();
+          ctx.shadowColor = grayColor();
+          ctx.shadowBlur = 8;
+          ctx.fillText(this.symbol, 0, 0);
+          ctx.restore();
+        }
+      }
+
+      class Ripple {
+        constructor(x, y) {
+          this.x = x;
+          this.y = y;
+          this.radius = 6;
+          this.maxRadius = 70;
+          this.speed = 1.8;
+          this.alpha = 0.6;
+        }
+        update() {
+          this.radius += this.speed;
+          this.alpha -= 0.012;
+        }
+        draw(ctx) {
+          if (this.alpha <= 0) return;
+          ctx.save();
+          ctx.globalAlpha = this.alpha;
+          ctx.strokeStyle = grayColor();
+          ctx.lineWidth = 2;
+          ctx.shadowColor = grayColor();
+          ctx.shadowBlur = 10;
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.restore();
+        }
+        isDead() { return this.alpha <= 0 || this.radius > this.maxRadius; }
+      }
+
+      const embers = [];
+      const ashes = [];
+      const stars = [];
+      const runes = [];
+      let sparks = [];
+      const ripples = [];
+
+      for (let i = 0; i < 90; i++) embers.push(new Ember());
+      for (let i = 0; i < 50; i++) ashes.push(new Ash());
+      for (let i = 0; i < 10; i++) stars.push(new ShootingStar());
+      for (let i = 0; i < 20; i++) runes.push(new Rune());
+
+      function explode(x, y, count = 35) {
+        for (let i = 0; i < count; i++) sparks.push(new Spark(x, y));
+      }
+
+      setInterval(() => {
+        if (Math.random() < 0.6) explode(Math.random() * width, Math.random() * height * 0.65, 25);
+      }, 2200);
+
+      setInterval(() => {
+        explode(50, 50, 18);
+        explode(width - 50, 50, 18);
+      }, 1000);
+
+      setInterval(() => explode(width/2, height/2, 130), 8000);
+
+      window.addEventListener('click', (e) => {
+        ripples.push(new Ripple(mouseX, mouseY));
+        explode(mouseX, mouseY, 25);
+      });
+
+      document.getElementById('fightBtn').addEventListener('click', (e) => {
+        const rect = e.target.getBoundingClientRect();
+        const cx = rect.left + rect.width/2;
+        const cy = rect.top + rect.height/2;
+        explode(cx, cy, 110);
+        for (let i = 0; i < 4; i++) ripples.push(new Ripple(cx + (Math.random()-0.5)*80, cy + (Math.random()-0.5)*50));
+      });
+
+      // Оверлей
+      const overlay = document.getElementById('overlay');
+      const mainContent = document.getElementById('mainContent');
+      const logoImage = document.getElementById('logoImage');
+      const overlayClose = document.getElementById('overlayClose');
+      let overlayTimer = null;
+      let isOverlayActive = false;
+
+      function showOverlay() {
+        if (isOverlayActive) return;
+        mainContent.style.opacity = '0';
+        overlay.classList.add('active');
+        isOverlayActive = true;
+        overlayTimer = setTimeout(closeOverlay, 10000);
+      }
+
+      function closeOverlay() {
+        overlay.classList.remove('active');
+        mainContent.style.opacity = '1';
+        isOverlayActive = false;
+        if (overlayTimer) {
+          clearTimeout(overlayTimer);
+          overlayTimer = null;
+        }
+      }
+
+      logoImage.addEventListener('click', (e) => {
+        e.stopPropagation();
+        showOverlay();
+      });
+
+      overlayClose.addEventListener('click', (e) => {
+        e.stopPropagation();
+        closeOverlay();
+      });
+
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) closeOverlay();
+      });
+
+      function animate() {
+        ctx.clearRect(0, 0, width, height);
+
+        for (let e of embers) { e.update(); e.draw(ctx); }
+        for (let a of ashes) { a.update(); a.draw(ctx); }
+        for (let s of stars) { s.update(); s.draw(ctx); }
+        for (let r of runes) { r.update(); r.draw(ctx); }
+
+        for (let i = sparks.length - 1; i >= 0; i--) {
+          sparks[i].update();
+          sparks[i].draw(ctx);
+          if (sparks[i].isDead()) sparks.splice(i, 1);
+        }
+
+        for (let i = ripples.length - 1; i >= 0; i--) {
+          ripples[i].update();
+          ripples[i].draw(ctx);
+          if (ripples[i].isDead()) ripples.splice(i, 1);
+        }
+
+        if (mouseX > 0 && mouseY > 0) {
+          const curGrad = ctx.createRadialGradient(mouseX, mouseY, 0, mouseX, mouseY, 35);
+          curGrad.addColorStop(0, 'rgba(255, 255, 255, 0.5)');
+          curGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+          ctx.fillStyle = curGrad;
+          ctx.beginPath();
+          ctx.arc(mouseX, mouseY, 35, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        requestAnimationFrame(animate);
+      }
+
+      animate();
+    })();
+  </script>
+</body>
+</html>
